@@ -1,3 +1,4 @@
+import math
 #Imprime el error generado, o error general
 def error(str = ''):
     if len(str):
@@ -24,9 +25,9 @@ def contar(str, letra):
 
 #Valida si lo recibido es un Numero
 def esNumero(str):
-    try:
+    try:        
         valFloat = float(str)
-        valInt = int(str)
+        valInt = int(valFloat)
         if (valFloat - valInt) == 0:
             return valInt
         return valFloat
@@ -67,19 +68,37 @@ def posFirstChar(str, letra):
     return position
 
 def realizarOperacion(commands):
-    resultado = 0
-    if commands[0] == '-':
-        if esNumero(commands[1]) and esNumero(commands[2]):
-            resultado = esNumero(commands[1]) - esNumero(commands[2])
-    elif commands[0] == '+':
-        if esNumero(commands[1]) and esNumero(commands[2]):
-            resultado = esNumero(commands[1]) + esNumero(commands[2])
-    elif commands[0] == '*':
-        if esNumero(commands[1]) and esNumero(commands[2]):
-            resultado = esNumero(commands[1]) * esNumero(commands[2])
-    elif commands[0] == '/':
-        if esNumero(commands[1]) and esNumero(commands[2]):
-            resultado = esNumero(commands[1]) / esNumero(commands[2])
+    resultado = 'A'
+    if esNumero(commands[1])  != 'False' and esNumero(commands[2])  != 'False':
+        numA = esNumero(commands[1])
+        numB = esNumero(commands[2])
+        if commands[0] == '-':
+            resultado = numA - numB
+        elif commands[0] == '+':
+            resultado = numA + numB
+        elif commands[0] == '*':
+            resultado = numA * numB
+        elif commands[0] == '/':
+            if numB == 0:
+                error(' Division entre cero')
+            else:
+                resultado = numA / numB
+    return resultado
+
+def realizarFuncion(commands):
+    resultado = 'A'
+    if esNumero(commands[1])  != 'False':
+        numA = esNumero(commands[1])
+        if commands[0] == 'sqr':
+            resultado = numA * numA
+        elif commands[0] == 'sqroot':
+            resultado = math.sqrt(numA)
+        elif commands[0] == 'sen':
+            resultado = math.sin(numA)
+        elif commands[0] == 'cos':
+            resultado = math.cos(numA)
+        elif commands[0] == 'tan':
+            resultado = math.tan(numA)
     return resultado
 
 def analizarCommando(entrada):
@@ -87,7 +106,7 @@ def analizarCommando(entrada):
         print('respuesta >> ', entrada)
     else:
         command = entrada[posLastChar(entrada, '('): len(entrada)]
-        command = command[0:posFirstChar(command, ')') + 1]
+        command = command[0:posFirstChar(command, ')') + 1]        
         if expresionCorrecta(command):
             strAux = entrada[0:posLastChar(entrada, '(')]
             strAux2 = entrada[posLastChar(entrada, '(') + len(command): len(entrada)]
@@ -95,11 +114,16 @@ def analizarCommando(entrada):
             command = command[1: len(command) - 1]
             commands = command.split(' ')
             if len(commands) == 3:
-                resultado = realizarOperacion(commands)            
-            else:
-                error('Faltan argumentos')
+                resultado = realizarOperacion(commands)
+            elif len(commands) == 2:
+                resultado = realizarFuncion(commands)
             entrada = strAux + str(resultado) + strAux2
-            analizarCommando(entrada)
+            if resultado == 'A':
+                error()
+            else:
+                analizarCommando(entrada)
+        else:
+             error('Espacios entre parentesis y argumentos')
 
 
 #Interfaz con el usuario
@@ -117,16 +141,14 @@ def init():
         elif contiene(command, '('):
             if contar(command, '(') == contar(command, ')'):
                 if espacios(command):
-
                    analizarCommando(command)
-
                 else:
                     error('existen espacios de más, o faltan espacios')
             else:
                 error('Faltan parentesis')
             continue
         elif esNumero(command) != 'False':
-            print(esNumero(command))
+            analizarCommando(command)
             continue
         else:
             error()
